@@ -1,0 +1,38 @@
+{
+  "name": "twitter-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./index.js"
+  },
+  "author": "sea.yang",
+  "license": "ISC",
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "koa": "^2.5.0",
+    "koa-router": "^7.4.0",
+    "koa-session": "^5.8.1",
+    "node-fetch": "^2.0.0",
+    "oauth": "^0.9.15"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "target": {
+            "node": "8.1"
+          }
+        }
+      ],
+      "react",
+      "stage-0"
+    ],
+    "plugins": [
+      "transform-decorators-legacy"
+    ]
+  }
+}
