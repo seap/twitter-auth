@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "babel-core": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-register": "^6.26.0",
     "koa": "^2.5.0",
