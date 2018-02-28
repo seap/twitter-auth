@@ -1,7 +1,6 @@
 import { OAuth } from 'oauth'
-import { consumerKey, consumerSecret } from '../config'
+import { consumerKey, consumerSecret, callbackUrl } from '../config'
 import codeMessage from '../codeMessage'
-const callbackUrl = 'http://seayang.me/twitter/token'
 
 const oAuth = new OAuth(
   'https://api.twitter.com/oauth/request_token',
@@ -63,12 +62,35 @@ function oAuthGet(url, oAuthAccessToken, oAuthAccessTokenSecret) {
   })
 }
 
+function oAuthPost(
+  url,
+  oAuthAccessToken,
+  oAuthAccessTokenSecret,
+  body,
+  contentType = 'application/x-www-form-urlencoded'
+) {
+  return new Promise((resolve, reject) => {
+    console.log('oAuthAccessToken: ', oAuthAccessToken)
+    console.log('oAuthAccessTokenSecret: ', oAuthAccessTokenSecret)
+    oAuth.post(url, oAuthAccessToken, oAuthAccessTokenSecret, body, contentType, (error, responseData, result) => {
+      if (error) {
+        return reject(error)
+      }
+      try {
+        return resolve(JSON.parse(responseData))
+      } catch (parseError) {
+        return reject(parseError)
+      }
+    })
+  })
+}
+
 export async function requestToken(ctx, next) {
   try {
     const { oAuthToken, oAuthTokenSecret } = await requestAccessToken()
     ctx.session.oAuthToken = oAuthToken
     ctx.session.oAuthTokenSecret = oAuthTokenSecret
-    ctx.body = oAuthToken
+    ctx.body = { ...codeMessage.success, data: oAuthToken }
   } catch (error) {
     console.log(error)
     return (ctx.body = codeMessage.exception)
@@ -91,7 +113,8 @@ export async function getToken(ctx, next) {
     )
     ctx.session.oAuthAccessToken = oAuthAccessToken
     ctx.session.oAuthAccessTokenSecret = oAuthAccessTokenSecret
-    ctx.body = ctx.session //"success";
+    //success
+    ctx.redirect('http://seayang.me:4000/twitter/twitters')
   } catch (error) {
     console.log(error)
     return (ctx.body = codeMessage.exception)
@@ -120,6 +143,28 @@ export async function queryTimeline(ctx, next) {
       'https://api.twitter.com/1.1/statuses/home_timeline.json?count=30',
       oAuthAccessToken,
       oAuthAccessTokenSecret
+    )
+    return (ctx.body = { ...codeMessage.success, data })
+  } catch (error) {
+    console.log(error)
+    return (ctx.body = codeMessage.exception)
+  }
+}
+
+export async function postTweeting(ctx, next) {
+  const { text } = ctx.request.body
+  if (!text) {
+    return (ctx.body = codeMessage.paramError)
+  }
+  const { oAuthAccessToken, oAuthAccessTokenSecret } = ctx.session
+  try {
+    const data = await oAuthPost(
+      'https://api.twitter.com/1.1/statuses/update.json',
+      oAuthAccessToken,
+      oAuthAccessTokenSecret,
+      {
+        status: text
+      }
     )
     return (ctx.body = { ...codeMessage.success, data })
   } catch (error) {

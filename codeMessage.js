@@ -7,6 +7,10 @@ export default {
     code: 1,
     message: 'unauthorized'
   },
+  paramError: {
+    code: 2,
+    message: 'param error'
+  },
   exception: {
     code: 99,
     message: 'exception'
